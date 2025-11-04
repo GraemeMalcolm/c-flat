@@ -223,10 +223,22 @@ public class Program
         string language = ""C#"";
         int year = 2025;
         bool isAwesome = true;
+        char grade = 'A';
         
         Console.WriteLine($""Language: {language}"");
         Console.WriteLine($""Year: {year}"");
         Console.WriteLine($""Is awesome: {isAwesome}"");
+        Console.WriteLine($""Grade: {grade}"");
+        Console.WriteLine();
+        
+        // Character and string examples
+        Console.Write('H');
+        Console.Write('e');
+        Console.Write('l');
+        Console.Write('l');
+        Console.Write('o');
+        Console.Write(' ');
+        Console.WriteLine(""World!"");
         Console.WriteLine();
         
         // Simple loop
@@ -351,12 +363,37 @@ public static class Console
         _output.AppendLine(value ?? """");
     }
     
+    public static void WriteLine(char value)
+    {
+        _output.AppendLine(value.ToString());
+    }
+    
     public static void WriteLine(object value)
     {
         _output.AppendLine(value?.ToString() ?? """");
     }
     
     public static void WriteLine(int value)
+    {
+        _output.AppendLine(value.ToString());
+    }
+    
+    public static void WriteLine(long value)
+    {
+        _output.AppendLine(value.ToString());
+    }
+    
+    public static void WriteLine(float value)
+    {
+        _output.AppendLine(value.ToString());
+    }
+    
+    public static void WriteLine(double value)
+    {
+        _output.AppendLine(value.ToString());
+    }
+    
+    public static void WriteLine(decimal value)
     {
         _output.AppendLine(value.ToString());
     }
@@ -371,9 +408,44 @@ public static class Console
         _output.Append(value ?? """");
     }
     
+    public static void Write(char value)
+    {
+        _output.Append(value.ToString());
+    }
+    
     public static void Write(object value)
     {
         _output.Append(value?.ToString() ?? """");
+    }
+    
+    public static void Write(int value)
+    {
+        _output.Append(value.ToString());
+    }
+    
+    public static void Write(long value)
+    {
+        _output.Append(value.ToString());
+    }
+    
+    public static void Write(float value)
+    {
+        _output.Append(value.ToString());
+    }
+    
+    public static void Write(double value)
+    {
+        _output.Append(value.ToString());
+    }
+    
+    public static void Write(decimal value)
+    {
+        _output.Append(value.ToString());
+    }
+    
+    public static void Write(bool value)
+    {
+        _output.Append(value.ToString());
     }
     
     internal static string GetCapturedOutput()

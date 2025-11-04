@@ -210,34 +210,60 @@
 
 @code {
     private string sourceCode = @"using System;
+using System.Text;
+
+public static class WebConsole
+{
+    private static StringBuilder _output = new StringBuilder();
+    
+    public static void WriteLine(string text = """")
+    {
+        _output.AppendLine(text);
+    }
+    
+    public static void Write(string text)
+    {
+        _output.Append(text);
+    }
+    
+    public static string GetOutput()
+    {
+        return _output.ToString();
+    }
+    
+    public static void Clear()
+    {
+        _output.Clear();
+    }
+}
 
 public class Program
 {
     public static void Main()
     {
-        Console.WriteLine(""Hello from C# WebAssembly!"");
-        Console.WriteLine("This code runs real C# compilation and execution in your browser.");
-        Console.WriteLine(string.Empty);
+        WebConsole.WriteLine(""Hello from C# WebAssembly!"");
+        WebConsole.WriteLine(""This code runs real C# compilation and execution in your browser."");
+        WebConsole.WriteLine();
         
         // Basic variables
         string language = ""C#"";
         int year = 2025;
         bool isAwesome = true;
         
-        Console.WriteLine($"Language: {language}");
-        Console.WriteLine($"Year: {year}");
-        Console.WriteLine($"Is awesome: {isAwesome}");
-        Console.WriteLine(string.Empty);
+        WebConsole.WriteLine($""Language: {language}"");
+        WebConsole.WriteLine($""Year: {year}"");
+        WebConsole.WriteLine($""Is awesome: {isAwesome}"");
+        WebConsole.WriteLine();
         
         // Simple loop
-        Console.WriteLine(""Counting to 5:"");
+        WebConsole.WriteLine(""Counting to 5:"");
         for (int i = 1; i <= 5; i++)
         {
-            Console.WriteLine($""Count: {i}"");
+            WebConsole.WriteLine($""Count: {i}"");
         }
         
-        Console.WriteLine(string.Empty);
-        Console.WriteLine("C# compilation successful!");
+        WebConsole.WriteLine();
+        WebConsole.WriteLine(""C# compilation successful!"");
     }
 }";
 
@@ -517,13 +543,15 @@ public class Program
 
     private Task<string> ExecuteAssembly(Assembly assembly)
     {
-        var output = new StringBuilder();
-        var originalOut = Console.Out;
-        
         try
         {
-            using var stringWriter = new StringWriter(output);
-            Console.SetOut(stringWriter);
+            // First, clear any previous output from WebConsole
+            var webConsoleType = assembly.GetType("WebConsole");
+            if (webConsoleType != null)
+            {
+                var clearMethod = webConsoleType.GetMethod("Clear", BindingFlags.Static | BindingFlags.Public);
+                clearMethod?.Invoke(null, null);
+            }
             
             // Find and execute the Main method with proper parameter handling
             var entryPoint = assembly.EntryPoint;
@@ -578,6 +606,19 @@ public class Program
                     return Task.FromResult("Error: No Program class found");
                 }
             }
+            
+            // Get output from WebConsole
+            if (webConsoleType != null)
+            {
+                var getOutputMethod = webConsoleType.GetMethod("GetOutput", BindingFlags.Static | BindingFlags.Public);
+                if (getOutputMethod != null)
+                {
+                    var output = getOutputMethod.Invoke(null, null) as string;
+                    return Task.FromResult(output ?? "");
+                }
+            }
+            
+            return Task.FromResult("Program executed successfully (no output captured)");
         }
         catch (TargetInvocationException ex)
         {
@@ -599,12 +640,6 @@ public class Program
             }
             return Task.FromResult($"Execution error: {ex.Message}");
         }
-        finally
-        {
-            Console.SetOut(originalOut);
-        }
-        
-        return Task.FromResult(output.ToString());
     }
 
     private class CompilationResult
